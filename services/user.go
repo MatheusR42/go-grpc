@@ -2,6 +2,9 @@ package services
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"log"
 	"time"
 
 	"github.com/matheusr42/go-grpc/pb/pb"
@@ -11,6 +14,7 @@ import (
 // 	AddUser(context.Context, *User) (*User, error)
 // 	mustEmbedUnimplementedUserServiceServer()
 //  AddUserVerbose(*User, UserService_AddUserVerboseServer) error
+//  AddUsers(UserService_AddUsersServer) error
 // }
 
 type UserService struct {
@@ -51,4 +55,26 @@ func (*UserService) AddUserVerbose(req *pb.User, stream pb.UserService_AddUserVe
 	time.Sleep(time.Second * 3)
 
 	return nil
+}
+
+func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
+	users := []*pb.User{}
+
+	for {
+		req, err := stream.Recv()
+
+		if err == io.EOF {
+			return stream.SendAndClose(&pb.Users{
+				User: users,
+			})
+		}
+
+		if err != nil {
+			log.Fatalf("Error while receiving stream", err.Error())
+		}
+
+		users = append(users, req)
+
+		fmt.Println("Adding user", req.GetId())
+	}
 }
