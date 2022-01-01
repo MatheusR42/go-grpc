@@ -10,7 +10,7 @@ import (
 // type UserServiceServer interface {
 // 	AddUser(context.Context, *User) (*User, error)
 // 	mustEmbedUnimplementedUserServiceServer()
-//  AddUserVerbose(ctx context.Context, in *User, opts ...grpc.CallOption) (UserService_AddUserVerboseClient, error)
+//  AddUserVerbose(*User, UserService_AddUserVerboseServer) error
 // }
 
 type UserService struct {
