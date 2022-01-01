@@ -15,6 +15,7 @@ import (
 // 	mustEmbedUnimplementedUserServiceServer()
 //  AddUserVerbose(*User, UserService_AddUserVerboseServer) error
 //  AddUsers(UserService_AddUsersServer) error
+//  AddUserStreamBoth(UserService_AddUserStreamBothServer) error
 // }
 
 type UserService struct {
@@ -70,11 +71,36 @@ func (*UserService) AddUsers(stream pb.UserService_AddUsersServer) error {
 		}
 
 		if err != nil {
-			log.Fatalf("Error while receiving stream", err.Error())
+			log.Fatal("Error while receiving stream", err.Error())
 		}
 
 		users = append(users, req)
 
 		fmt.Println("Adding user", req.GetId())
+	}
+}
+
+func (*UserService) AddUserStreamBoth(stream pb.UserService_AddUserStreamBothServer) error {
+	for {
+		req, err := stream.Recv()
+
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			log.Fatal("Error while receiving stream", err.Error())
+		}
+
+		err = stream.Send(&pb.UserResultStream{
+			Status: "Added",
+			User:   req,
+		})
+
+		fmt.Println("Added user", req.GetId())
+
+		if err != nil {
+			log.Fatal("Error to send stream to the client: ", err.Error())
+		}
 	}
 }
