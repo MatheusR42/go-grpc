@@ -25,11 +25,7 @@ func (*UserService) AddUser(ctx context.Context, req *pb.User) (*pb.User, error)
 	// inserting to db
 
 	// returning
-	return &pb.User{
-		Id:    "123",
-		Name:  nil,
-		Email: req.GetEmail(),
-	}, nil
+	return req, nil
 }
 
 func (*UserService) AddUserVerbose(req *pb.User, stream pb.UserService_AddUserVerboseServer) error {
@@ -42,22 +38,14 @@ func (*UserService) AddUserVerbose(req *pb.User, stream pb.UserService_AddUserVe
 
 	stream.Send(&pb.UserResultStream{
 		Status: "Saving in DB",
-		User: &pb.User{
-			Name:  nil,
-			Id:    req.GetId(),
-			Email: req.GetEmail(),
-		},
+		User:   req,
 	})
 
 	time.Sleep(time.Second * 3)
 
 	stream.Send(&pb.UserResultStream{
 		Status: "Done",
-		User: &pb.User{
-			Name:  nil,
-			Id:    req.GetId(),
-			Email: req.GetEmail(),
-		},
+		User:   req,
 	})
 
 	time.Sleep(time.Second * 3)
